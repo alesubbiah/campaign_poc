@@ -103,3 +103,5 @@ if __name__ == "__main__":
     link = get_stable_image(
         'principal campaign image featuring a diverse group of strong, confident women wearing Lululemon activewear, 8k, digital painting by Android Jones')
     print(f"Here is your image: {link}")
+
+

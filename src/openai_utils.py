@@ -2,6 +2,7 @@ from loguru import logger
 import openai
 import json
 from pathlib import Path
+import streamlit as st
 from src.gcp_utils import (get_secret_from_gcp,
                            TEAM_SECRETS_GCP_PROJECT_SECRET_ID,
                            get_gcp_project_id_from_env_var)
@@ -32,9 +33,47 @@ def get_openai_creds(gcp_project_id):
     return gpt3_creds_dict
 
 
+# def get_gpt4_campaign_response_azure(user_input,
+#                                type='gpt4',
+#                                gpt4_creds_dict=None):
+#     """Get text response from GPT4 Azure
+
+#     Args:
+#         user_input (str): User query / question
+#         type (str): Type of prompt to send to GPT4 (either normal or events)
+#         gpt4_creds_dict (dict, optional): Specific creds for GPT4 in Azure.
+#                                           Defaults to None.
+
+#     Returns:
+#         str: Text response from GPT4
+#     """
+
+#     if gpt4_creds_dict is None:
+#         gcp_project_id = get_gcp_project_id_from_env_var()
+#         gpt4_creds_dict = get_openai_creds(
+#             gcp_project_id=gcp_project_id)
+#     messages = _get_newgpt_prompt(type=type)
+#     prompt = _add_role_user(user_input, messages)
+#     logger.info('Setting azure creds to send to openai')
+#     _set_openai_to_azure(azure_openai_creds_dict=gpt4_creds_dict)
+
+#     logger.info('Getting campaign from GPT4')
+#     prompt = _add_role_user(user_input, messages)
+#     response = openai.ChatCompletion.create(
+#         engine="GPT-4",
+#         messages=prompt,
+#         temperature=0.8,
+#         max_tokens=1200,
+#         top_p=0.95,
+#         frequency_penalty=0,
+#         presence_penalty=0,
+#         stop=None)
+
+#     text_response = response["choices"][0]["message"]["content"]
+#     return text_response
+
 def get_gpt4_campaign_response(user_input,
                                type='gpt4',
-                               openai_type='azure',
                                gpt4_creds_dict=None):
     """Get text response from GPT4 Azure
 
@@ -47,23 +86,17 @@ def get_gpt4_campaign_response(user_input,
     Returns:
         str: Text response from GPT4
     """
-
     if gpt4_creds_dict is None:
-        gcp_project_id = get_gcp_project_id_from_env_var()
-        gpt4_creds_dict = get_openai_creds(
-            gcp_project_id=gcp_project_id)
+        gpt4_creds_dict = st.secrets.openai
     messages = _get_newgpt_prompt(type=type)
     prompt = _add_role_user(user_input, messages)
-    logger.info('Setting azure creds to send to openai')
-    if openai_type == 'azure':
-        _set_openai_to_azure(azure_openai_creds_dict=gpt4_creds_dict)
-    elif openai_type == 'openai':
-        _set_openai(openai_creds=gpt4_creds_dict)
+    logger.info('Setting creds to send to openai')
+    _set_openai(openai_creds=gpt4_creds_dict)
 
     logger.info('Getting campaign from GPT4')
     prompt = _add_role_user(user_input, messages)
-    response = openai.ChatCompletion.create(
-        engine="GPT-4",
+    response = openai.chat.completions.create(
+        model='gpt-4',
         messages=prompt,
         temperature=0.8,
         max_tokens=1200,
@@ -72,12 +105,50 @@ def get_gpt4_campaign_response(user_input,
         presence_penalty=0,
         stop=None)
 
-    text_response = response["choices"][0]["message"]["content"]
+    text_response = response.choices[0].message.content
     return text_response
 
 
+# def get_gpt4_insta_response_azure(user_input, campaign, gpt4_creds_dict=None):
+#     """Get text response from GPT4 azure (for instagram posts specifically
+#     after generating a campaign)
+
+#     Args:
+#         user_input (str): parsed user input,
+#             from the function parse_user_input_gpt4
+#         campaign (str): campaign returned from get_gpt4_campaign
+#         gpt4_creds_dict (dict, optional): Specific creds for GPT4 in Azure.
+#             Defaults to None.
+
+#     Returns:
+#         str: instagram posts
+#     """
+#     if gpt4_creds_dict is None:
+#         gcp_project_id = get_gcp_project_id_from_env_var()
+#         gpt4_creds_dict = get_openai_creds(
+#             gcp_project_id=gcp_project_id)
+#     _set_openai(openai_creds=gpt4_creds_dict)
+#     messages = _get_newgpt_prompt(type='gpt4')
+#     prompt = _add_role_user(user_input, messages)
+#     logger.info('Adding campaign to get back instagram posts')
+#     prompt_campaign = _add_campaign(campaign, prompt)
+#     prompt_insta = _add_insta(prompt_campaign)
+
+#     response = openai.ChatCompletion.create(
+#         engine="GPT-4",
+#         messages=prompt_insta,
+#         temperature=0.8,
+#         max_tokens=1200,
+#         top_p=0.95,
+#         frequency_penalty=0,
+#         presence_penalty=0,
+#         stop=None)
+
+#     text_response_insta = response["choices"][0]["message"]["content"]
+#     return text_response_insta
+
 def get_gpt4_insta_response(user_input, campaign, gpt4_creds_dict=None):
-    """Get text response from GPT4 azure (for instagram posts specifically
+    """Get text response from GPT4 (for instagram posts specifically
     after generating a campaign)
 
     Args:
@@ -91,18 +162,17 @@ def get_gpt4_insta_response(user_input, campaign, gpt4_creds_dict=None):
         str: instagram posts
     """
     if gpt4_creds_dict is None:
-        gcp_project_id = get_gcp_project_id_from_env_var()
-        gpt4_creds_dict = get_openai_creds(
-            gcp_project_id=gcp_project_id)
-
+        gpt4_creds_dict = st.secrets.openai
     messages = _get_newgpt_prompt(type='gpt4')
     prompt = _add_role_user(user_input, messages)
+    _set_openai(openai_creds=gpt4_creds_dict)
     logger.info('Adding campaign to get back instagram posts')
     prompt_campaign = _add_campaign(campaign, prompt)
     prompt_insta = _add_insta(prompt_campaign)
 
-    response = openai.ChatCompletion.create(
-        engine="GPT-4",
+    logger.info('Getting insta campaign from GPT4')
+    response = openai.chat.completions.create(
+        model='gpt-4',
         messages=prompt_insta,
         temperature=0.8,
         max_tokens=1200,
@@ -111,8 +181,27 @@ def get_gpt4_insta_response(user_input, campaign, gpt4_creds_dict=None):
         presence_penalty=0,
         stop=None)
 
-    text_response_insta = response["choices"][0]["message"]["content"]
-    return text_response_insta
+    text_response = response.choices[0].message.content
+    return text_response
+    # messages = _get_newgpt_prompt(type='gpt4')
+    # prompt = _add_role_user(user_input, messages)
+    # logger.info('Adding campaign to get back instagram posts')
+    # prompt_campaign = _add_campaign(campaign, prompt)
+    # prompt_insta = _add_insta(prompt_campaign)
+
+    # response = openai.ChatCompletion.create(
+    #     engine="GPT-4",
+    #     messages=prompt_insta,
+    #     temperature=0.8,
+    #     max_tokens=1200,
+    #     top_p=0.95,
+    #     frequency_penalty=0,
+    #     presence_penalty=0,
+    #     stop=None)
+
+    # text_response_insta = response.choices[0].message.content
+    # return text_response_insta
+
 
 
 def add_newline_before_digits(text):
@@ -132,7 +221,7 @@ def _set_openai_to_azure(azure_openai_creds_dict, use_preview_api=True):
 
 
 def _set_openai(openai_creds):
-    openai.api_key = openai_creds.api_key
+    openai.api_key = openai_creds
 
 def _add_role_user(user_input, prompt):
     messages_sender = {"role": "user", "content": user_input}
@@ -147,14 +236,14 @@ def _add_campaign(campaign, prompt):
 
 
 def _add_insta(prompt):
-    insta_tag = """Amazing! can you generate a numbered list of 10 Instagram \
-        posts prompting this campaign. I only need an emoji-filled caption and \
-        highly detailed and specific image description that will be sent to an\
+    insta_tag = """Amazing! can you generate a numbered list of 4 Instagram
+        posts prompting this campaign. I only need an emoji-filled caption and
+        highly detailed and specific image description that will be sent to an
             AI Image Generator as a prompt. I need the answer in this format:
-        1. Caption: 🎉🎬 Celebrating 100 years of Disney magic! Join us on this\
+        1. Caption: 🎉🎬 Celebrating 100 years of Disney magic! Join us on this
               enchanting journey with #ACenturyofDreams 🏰💖
-        2. Image Description: A colorful image of a retro suitcase adorned \
-            with stickers representing Disney movies from different decades, \
+        2. Image Description: A colorful image of a retro suitcase adorned
+            with stickers representing Disney movies from different decades,
                 set against a background of clouds and stars.
         """
     message_insta = {"role": "user", "content": insta_tag}

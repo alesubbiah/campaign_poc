@@ -30,6 +30,7 @@ def _format_instapost(insta_image_desc):
     # Regex to eliminate only the double newlines with a number from the list
     # Returned by GPT4
     logger.info('Formatting posts for instagram')
+    logger.info(f'{insta_image_desc}')
     replaced = re.sub(r"\n\n\d+\.\s", '', insta_image_desc)
     return replaced
 

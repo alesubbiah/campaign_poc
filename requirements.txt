@@ -117,3 +117,5 @@ wcwidth==0.2.6
 yarg==0.1.9
 yarl==1.9.2
 zipp==3.15.0
+langchain-openai
+pydantic

@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from loguru import logger
 import datetime
@@ -7,13 +8,13 @@ from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain.chat_models import AzureChatOpenAI
 from langchain.chains import LLMChain
-import openai
+from langchain_openai import ChatOpenAI
 import openai
 from predicthq import Client
 
 from src.gcp_utils import (get_secret_from_gcp,
                            TEAM_SECRETS_GCP_PROJECT_SECRET_ID)
-
+import streamlit as st
 
 # TODO:
 # class EventsAPIWrapper(BaseModel):
@@ -31,26 +32,30 @@ from src.gcp_utils import (get_secret_from_gcp,
 #         """
 
 
-def get_predict_creds(gcp_project_id='wpp-cto-os-intlignce-layer-dev'):
-    """Get an api key for PredictHQ from GCP Secret Manager service
+# def get_predict_creds(gcp_project_id='wpp-cto-os-intlignce-layer-dev'):
+#     """Get an api key for PredictHQ from GCP Secret Manager service
 
-    Args:
-        gcp_project_id (str): For retrieving the GCP Project ID that holds the
-            wanted secret (since the wanted secret is for the team, not an
-            individual).
+#     Args:
+#         gcp_project_id (str): For retrieving the GCP Project ID that holds the
+#             wanted secret (since the wanted secret is for the team, not an
+#             individual).
 
-    Returns:
-        dict (gpt3_creds_dict): Keys include 'api_key'.
-    """
-    logger.info('Getting PredictHQ API Azure key from GCP Secrets Manager')
-    team_secrets_project_id = get_secret_from_gcp(
-        gcp_project_id=gcp_project_id,
-        secret_id=TEAM_SECRETS_GCP_PROJECT_SECRET_ID)
+#     Returns:
+#         dict (gpt3_creds_dict): Keys include 'api_key'.
+#     """
+#     logger.info('Getting PredictHQ API Azure key from GCP Secrets Manager')
+#     team_secrets_project_id = get_secret_from_gcp(
+#         gcp_project_id=gcp_project_id,
+#         secret_id=TEAM_SECRETS_GCP_PROJECT_SECRET_ID)
 
-    predict_creds_dict = get_secret_from_gcp(
-        gcp_project_id=team_secrets_project_id,
-        secret_id='predict-creds-json', is_json=True)
-    return predict_creds_dict
+#     predict_creds_dict = get_secret_from_gcp(
+#         gcp_project_id=team_secrets_project_id,
+#         secret_id='predict-creds-json', is_json=True)
+#     return predict_creds_dict
+
+def get_predict_creds():
+    predict_creds = st.secrets.predict_hq
+    return predict_creds
 
 
 def _get_first_day_of_year():
@@ -58,14 +63,17 @@ def _get_first_day_of_year():
     first_day = datetime.datetime(current_year, 1, 1)
     return first_day.date()
 
+
 def _get_last_day_of_year():
     current_year = datetime.datetime.now().year
     last_day = datetime.datetime(current_year, 12, 31)
     return last_day
 
+
 def _get_date_a_year_from_today():
     one_year_from_today = datetime.date.today() + datetime.timedelta(days=365)
     return one_year_from_today
+
 
 def _set_openai_to_azure(azure_openai_creds_dict, use_preview_api=True):
     api_version = (azure_openai_creds_dict['api_preview_version']
@@ -74,6 +82,10 @@ def _set_openai_to_azure(azure_openai_creds_dict, use_preview_api=True):
     openai.api_base = azure_openai_creds_dict['api_base']
     openai.api_version = api_version
     openai.api_key = azure_openai_creds_dict['api_key']
+
+
+def _set_openai(openai_creds):
+    openai.api_key = openai_creds
 
 
 def find_events_by_city(city_name, start_date=None, end_date=None):
@@ -129,8 +141,9 @@ def get_list_of_events_from_df(df):
     event_list = list(df[:50]['title'].drop_duplicates())
     return event_list
 
+
 # Define Events prompt and chain
-def get_event_recommendations(city, campaign, events_list, gpt4_creds_dict):
+def get_event_recommendations_azure(city, campaign, events_list, gpt4_creds_dict):
     _set_openai_to_azure(gpt4_creds_dict)
     chat = set_chat()
     template_events = """
@@ -152,7 +165,31 @@ def get_event_recommendations(city, campaign, events_list, gpt4_creds_dict):
 
     return dict
 
-def set_chat(deployment_name='GPT-4'):
+
+def get_event_recommendations(city, campaign, events_list, gpt4_creds_dict):
+    _set_openai(gpt4_creds_dict)
+    chat = set_chat(gpt4_creds_dict)
+    template_events = """
+    You are an expert brand manager. Given a campaign, a city, and a list of events in that city, choose which events would be most appropriate for a partnership?
+    Provide as much reasoning as you can, in terms of brand attribute fit.
+    City: {city}
+    Campaign: {campaign}
+    List of events: {events_list}
+    """
+
+    prompt_events = PromptTemplate(
+                        template=template_events,
+                        input_variables=['city', 'campaign', 'events_list'])
+    model = chat
+    chain = prompt_events | model
+    dict_chain = {'city': city, 'campaign': campaign,
+                  'events_list': events_list}
+    response = chain.invoke(dict_chain)
+
+    return response
+
+
+def set_chat_azure(deployment_name='GPT-4'):
     """Sets OpenAI Azure model of GPT4 for use with Langchain
 
     Args:
@@ -168,6 +205,15 @@ def set_chat(deployment_name='GPT-4'):
                       openai_api_version=openai.api_version,
                       openai_api_type='azure')
 
+    return chat
+
+
+def set_chat(creds_dict):
+    os.environ["OPENAI_API_KEY"] = creds_dict['api_key']
+    chat = ChatOpenAI(
+        model='gpt-4',
+        temperature=0.8
+    )
     return chat
 
 
