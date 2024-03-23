@@ -31,6 +31,11 @@ def get_creds_dic(gcp_project_id):
     return creds
 
 
+open_ai_creds = st.secrets.openai
+predict_creds = st.secrets.predict_HQ
+replicate_creds = st.secrets.replicate
+
+
 def render_app():
     gcp_project_id = get_gcp_project_id_from_env_var()
     creds = get_creds_dic(gcp_project_id=gcp_project_id)

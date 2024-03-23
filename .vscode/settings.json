@@ -1,0 +1,143 @@
+{
+    //vertical guidelines
+    "editor.rulers": [79, 120],
+
+    //allow imports from the project root (not to be used in production)
+    "terminal.integrated.env.linux": {
+      "PYTHONPATH": "${workspaceFolder}",
+    },
+    "terminal.integrated.env.osx": {
+      "PYTHONPATH": "${workspaceFolder}",
+    },
+    "terminal.integrated.env.windows": {
+      "PYTHONPATH": "${workspaceFolder}",
+    },
+
+    //remove trailing spaces from ends of lines
+    "files.trimTrailingWhitespace": true,
+
+    //set Python linter (installed using pipx and located using 'which flake8')
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": true,
+    "python.linting.flake8Path": "~/.local/bin/flake8",
+
+    //automtaically generate docstrings for functions
+    "autoDocstring.docstringFormat": "google",
+    "autoDocstring.generateDocstringOnEnter": true,
+    "autoDocstring.includeExtendedSummary": false,
+    "autoDocstring.guessTypes": true,
+
+    ///////////////////////////////////////
+    //***BELOW: EXAMPLE OF USER SETTINGS***
+
+    //Examples of settings appropriate for user's (not a repo's) settings.json
+    //file, i.e. settings that are user preferences, rather than being
+    //required by a repo to encourage consistency in coding style. A user's
+    //settings.json could also include defaults that are preferred by a user
+    //but can be over-ruled by a repo's settings.json.
+
+    //directory for a user's setting.json:
+    //for user in Windows: %APPDATA%\Code\User\settings.json
+    //for user in MacOs: ~/Library/Application\ Support/Code/User/settings.json
+    //for user in Linux: ~/.config/Code/User/settings.json
+
+    // //vertical guidelines
+    // "editor.rulers": [79, 120],
+
+    // //allow imports from the project root (not to be used in production)
+    // "terminal.integrated.env.linux": {
+    //   "PYTHONPATH": "${workspaceFolder}",
+    // },
+    // "terminal.integrated.env.osx": {
+    //   "PYTHONPATH": "${workspaceFolder}",
+    // },
+    // "terminal.integrated.env.windows": {
+    //   "PYTHONPATH": "${workspaceFolder}",
+    // },
+
+    // //remove trailing spaces from ends of lines
+    // "files.trimTrailingWhitespace": true,
+
+    // //set Python linter (installed using pipx and located using 'which flake8')
+    // "python.linting.flake8Enabled": true,
+    // "python.linting.enabled": true,
+    // "python.linting.flake8Path": "~/.local/bin/flake8",
+
+    // //automtaically generate docstrings for functions
+    // "autoDocstring.docstringFormat": "google",
+    // "autoDocstring.generateDocstringOnEnter": true,
+    // "autoDocstring.includeExtendedSummary": false,
+    // "autoDocstring.guessTypes": true,
+
+    // //editor guides
+    // "editor.minimap.maxColumn": 79,
+
+    // //set Python virtual enviornment location
+    // "python.defaultInterpreterPath": "${workspaceFolder}/venv",
+
+    // //enable Jedi as IntelliSense engine instead of Microsoft Python Analysis
+    // //(see https://stackoverflow.com/questions/57105741/
+    // // vs-code-how-to-find-all-references-of-a-variable-in-python)
+    // "python.jediEnabled": true,
+    // "python.languageServer": "Jedi",
+
+    // //ignore white space when comparing files
+    // "diffEditor.ignoreTrimWhitespace": false,
+
+    // //auto-save files
+    // "files.autoSave": "afterDelay",
+
+    // //misc
+    // "explorer.confirmDragAndDrop": false,
+    // "editor.suggestSelection": "first",
+    // "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+
+    // //icons
+    // "workbench.iconTheme": "vscode-icons",
+
+    // //colour theme for in-editor terminals
+    // "workbench.colorCustomizations": {
+    //   "terminal.background":"#1D2021",
+    //   "terminal.foreground":"#A89984",
+    //   "terminalCursor.background":"#A89984",
+    //   "terminalCursor.foreground":"#A89984",
+    //   "terminal.ansiBlack":"#1D2021",
+    //   "terminal.ansiBlue":"#0D6678",
+    //   "terminal.ansiBrightBlack":"#665C54",
+    //   "terminal.ansiBrightBlue":"#0D6678",
+    //   "terminal.ansiBrightCyan":"#8BA59B",
+    //   "terminal.ansiBrightGreen":"#95C085",
+    //   "terminal.ansiBrightMagenta":"#8F4673",
+    //   "terminal.ansiBrightRed":"#FB543F",
+    //   "terminal.ansiBrightWhite":"#FDF4C1",
+    //   "terminal.ansiBrightYellow":"#FAC03B",
+    //   "terminal.ansiCyan":"#8BA59B",
+    //   "terminal.ansiGreen":"#95C085",
+    //   "terminal.ansiMagenta":"#8F4673",
+    //   "terminal.ansiRed":"#FB543F",
+    //   "terminal.ansiWhite":"#A89984",
+    //   "terminal.ansiYellow":"#FAC03B"
+    // },
+
+    // //exclude the watching of files
+    // "files.watcherExclude": {
+    //   "**/.git/objects/**": true,
+    //   "**/.git/subtree-cache/**": true,
+    //   "**/venv/*/**": true
+    // },
+
+    // //recognise specific file extensions
+    // "workbench.editorAssociations": {
+    //   "*.pdf": "latex-workshop-pdf-hook",
+    //   "*.ipynb": "jupyter-notebook"
+    // },
+
+    // //specify remote machine options
+    // "remote.SSH.useLocalServer": false,
+    // "remote.SSH.showLoginTerminal": true,
+    // "remote.SSH.remotePlatform": {
+    //   "vscode-gcp-vm": "linux"
+    // },
+    // "remote.SSH.configFile": "~/.ssh/vscode_gcp_vm_ssh_config.txt",
+    // "remote.SSH.connectTimeout": 60,
+}

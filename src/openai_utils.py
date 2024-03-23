@@ -32,7 +32,10 @@ def get_openai_creds(gcp_project_id):
     return gpt3_creds_dict
 
 
-def get_gpt4_campaign_response(user_input, type='gpt4', gpt4_creds_dict=None):
+def get_gpt4_campaign_response(user_input,
+                               type='gpt4',
+                               openai_type='azure',
+                               gpt4_creds_dict=None):
     """Get text response from GPT4 Azure
 
     Args:
@@ -52,7 +55,10 @@ def get_gpt4_campaign_response(user_input, type='gpt4', gpt4_creds_dict=None):
     messages = _get_newgpt_prompt(type=type)
     prompt = _add_role_user(user_input, messages)
     logger.info('Setting azure creds to send to openai')
-    _set_openai_to_azure(azure_openai_creds_dict=gpt4_creds_dict)
+    if openai_type == 'azure':
+        _set_openai_to_azure(azure_openai_creds_dict=gpt4_creds_dict)
+    elif openai_type == 'openai':
+        _set_openai(openai_creds=gpt4_creds_dict)
 
     logger.info('Getting campaign from GPT4')
     prompt = _add_role_user(user_input, messages)
@@ -124,6 +130,9 @@ def _set_openai_to_azure(azure_openai_creds_dict, use_preview_api=True):
     openai.api_version = api_version
     openai.api_key = azure_openai_creds_dict['api_key']
 
+
+def _set_openai(openai_creds):
+    openai.api_key = openai_creds.api_key
 
 def _add_role_user(user_input, prompt):
     messages_sender = {"role": "user", "content": user_input}
